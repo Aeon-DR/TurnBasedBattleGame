@@ -1,4 +1,6 @@
-﻿Party heroes = new Party(new List<Character> { new Skeleton() });
+﻿string protagonistName = InputHelper.ChooseHeroName("What is the protagonist's name?");
+
+Party heroes = new Party(new List<Character> { new Protagonist(protagonistName) });
 Party monsters = new Party(new List<Character> { new Skeleton() });
 
 Battle battle = new Battle(heroes, monsters);
@@ -48,6 +50,16 @@ public abstract class Character
     }
 }
 
+public class Protagonist : Character
+{
+    public override string Name { get; }
+
+    public Protagonist(string name)
+    {
+        Name = name;
+    }
+}
+
 public class Skeleton : Character
 {
     public override string Name => "SKELETON";
@@ -80,5 +92,25 @@ public class SkipTurnAction : IAction
     public void Perform()
     {
         Console.WriteLine($"{_actor.Name} SKIPPED the turn.");
+    }
+}
+
+public static class InputHelper
+{
+    public static string ChooseHeroName(string prompt)
+    {
+        while (true)
+        {
+            Console.WriteLine(prompt);
+            string? name = Console.ReadLine()?.Trim().ToUpper();
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                Console.WriteLine("The name cannot be empty.");
+                continue;
+            }
+
+            return name;
+        }
     }
 }
