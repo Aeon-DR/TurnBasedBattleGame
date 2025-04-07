@@ -3,16 +3,21 @@
 Party heroes = new Party(new List<Character> { new Protagonist(protagonistName) });
 Party monsters = new Party(new List<Character> { new Skeleton() });
 
-Battle battle = new Battle(heroes, monsters);
+Battle battle = new Battle(new ComputerPlayer(), new ComputerPlayer(), heroes, monsters);
 battle.Run();
 
 public class Battle
 {
+    public IPlayer HeroesPlayer { get; }
+    public IPlayer MonstersPlayer { get; }
+
     public Party Heroes { get; }
     public Party Monsters { get; }
 
-    public Battle(Party heroes, Party monsters)
+    public Battle(IPlayer heroesPlayer, IPlayer monstersPlayer, Party heroes, Party monsters)
     {
+        HeroesPlayer = heroesPlayer;
+        MonstersPlayer = monstersPlayer;
         Heroes = heroes;
         Monsters = monsters;
     }
@@ -21,17 +26,18 @@ public class Battle
     {
         while (true)
         {
-            HandlePartyTurn(Heroes);
-            HandlePartyTurn(Monsters);
+            HandlePartyTurn(HeroesPlayer, Heroes);
+            HandlePartyTurn(MonstersPlayer, Monsters);
         }
     }
 
-    private static void HandlePartyTurn(Party party)
+    private static void HandlePartyTurn(IPlayer player, Party party)
     {
         foreach(Character character in party.Characters)
         {
             Console.WriteLine($"It is {character.Name}'s turn.");
-            IAction chosenAction = character.TakeTurn();
+
+            IAction chosenAction = player.ChooseAction(character);
             chosenAction.Perform();
 
             Console.WriteLine();
@@ -40,14 +46,22 @@ public class Battle
     }
 }
 
+public interface IPlayer
+{
+    IAction ChooseAction(Character character);
+}
+
+public class ComputerPlayer : IPlayer
+{
+    public IAction ChooseAction(Character character)
+    {
+        return new SkipTurnAction(character);
+    }
+}
+
 public abstract class Character
 {
     public abstract string Name { get; }
-
-    public IAction TakeTurn()
-    {
-        return new SkipTurnAction(this);
-    }
 }
 
 public class Protagonist : Character
