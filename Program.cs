@@ -31,42 +31,55 @@ public class Battle
         }
     }
 
-    private static void HandlePartyTurn(IPlayer player, Party party)
+    private void HandlePartyTurn(IPlayer player, Party party)
     {
         foreach(Character character in party.Characters)
         {
-            Console.WriteLine($"It is {character.Name}'s turn.");
-
-            IAction chosenAction = player.ChooseAction(character);
-            chosenAction.Perform();
-
             Console.WriteLine();
-            Thread.Sleep(1000);
+
+            Console.WriteLine($"It is {character.Name}'s turn.");
+            IAction chosenAction = player.ChooseAction(this, character);
+            chosenAction.Perform();
         }
     }
-}
+
+    public Party GetPartyFor(Character character) => Heroes.Characters.Contains(character) ? Heroes : Monsters;
+    public Party GetEnemyPartyFor(Character character) => Heroes.Characters.Contains(character) ? Monsters : Heroes;}
 
 public interface IPlayer
 {
-    IAction ChooseAction(Character character);
+    IAction ChooseAction(Battle battle, Character actor);
 }
 
 public class ComputerPlayer : IPlayer
 {
-    public IAction ChooseAction(Character character)
+    public IAction ChooseAction(Battle battle, Character actor)
     {
-        return new SkipTurnAction(character);
+        // A brief delay to simulate hesitation
+        Thread.Sleep(1000);
+
+        Character target = SelectRandomTarget(battle, actor);
+        return new AttackAction(actor, target);
+    }
+
+    private Character SelectRandomTarget(Battle battle, Character character)
+    {
+        Random random = new Random();
+        Party enemyParty = battle.GetEnemyPartyFor(character);
+        return enemyParty.Characters[random.Next(enemyParty.Characters.Count)];
     }
 }
 
 public abstract class Character
 {
     public abstract string Name { get; }
+    public abstract StandardAttack StandardAttack { get; }
 }
 
 public class Protagonist : Character
 {
     public override string Name { get; }
+    public override StandardAttack StandardAttack { get; } = new StandardAttack("PUNCH");
 
     public Protagonist(string name)
     {
@@ -77,6 +90,7 @@ public class Protagonist : Character
 public class Skeleton : Character
 {
     public override string Name => "SKELETON";
+    public override StandardAttack StandardAttack { get; } = new StandardAttack("BONE CRUNCH");
 }
 
 public class Party
@@ -96,7 +110,7 @@ public interface IAction
 
 public class SkipTurnAction : IAction
 {
-    private Character _actor;
+    private readonly Character _actor;
 
     public SkipTurnAction(Character actor)
     {
@@ -108,6 +122,39 @@ public class SkipTurnAction : IAction
         Console.WriteLine($"{_actor.Name} SKIPPED the turn.");
     }
 }
+
+public class AttackAction : IAction
+{
+    private readonly Character _actor;
+    private readonly Character _target;
+
+    public AttackAction(Character actor, Character target)
+    {
+        _actor = actor;
+        _target = target;
+    }
+
+    public void Perform()
+    {
+        Console.WriteLine($"{_actor.Name} used {_actor.StandardAttack.Name} on {_target.Name}.");
+    }
+}
+
+public interface IAttack
+{
+    string Name { get; }
+}
+
+public class StandardAttack : IAttack
+{
+    public string Name { get; }
+
+    public StandardAttack(string name)
+    {
+        Name = name;
+    }
+}
+
 
 public static class InputHelper
 {
