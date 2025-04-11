@@ -59,7 +59,7 @@ public class ComputerPlayer : IPlayer
         Thread.Sleep(1000);
 
         Character target = SelectRandomTarget(battle, actor);
-        return new AttackAction(actor, target);
+        return new AttackAction(actor, target, actor.StandardAttack);
     }
 
     private Character SelectRandomTarget(Battle battle, Character character)
@@ -72,25 +72,34 @@ public class ComputerPlayer : IPlayer
 
 public abstract class Character
 {
-    public abstract string Name { get; }
-    public abstract StandardAttack StandardAttack { get; }
+    public string Name { get; }
+    public IAttack StandardAttack { get; }
+    public int MaxHealth { get; }
+
+    private int _currentHealth;
+    public int CurrentHealth
+    {
+        get => _currentHealth;
+        set => _currentHealth = Math.Clamp(value, 0, MaxHealth); // Prevent from reducing HP below 0 and healing above max HP
+    }
+
+    protected Character(string name, IAttack standardAttack, int maxHealth)
+    {
+        Name = name;
+        StandardAttack = standardAttack;
+        MaxHealth = maxHealth;
+        CurrentHealth = maxHealth;
+    }
 }
 
 public class Protagonist : Character
 {
-    public override string Name { get; }
-    public override StandardAttack StandardAttack { get; } = new StandardAttack("PUNCH");
-
-    public Protagonist(string name)
-    {
-        Name = name;
-    }
+    public Protagonist(string name) : base(name, new Punch(), 25) { }
 }
 
 public class Skeleton : Character
 {
-    public override string Name => "SKELETON";
-    public override StandardAttack StandardAttack { get; } = new StandardAttack("BONE CRUNCH");
+    public Skeleton() : base("SKELETON", new BoneCrunch(), 5) { }
 }
 
 public class Party
@@ -127,34 +136,48 @@ public class AttackAction : IAction
 {
     private readonly Character _actor;
     private readonly Character _target;
+    private readonly IAttack _attack;
 
-    public AttackAction(Character actor, Character target)
+    public AttackAction(Character actor, Character target, IAttack attack)
     {
         _actor = actor;
         _target = target;
+        _attack = attack;
     }
 
     public void Perform()
     {
-        Console.WriteLine($"{_actor.Name} used {_actor.StandardAttack.Name} on {_target.Name}.");
+        Console.WriteLine($"{_actor.Name} used {_attack.Name} on {_target.Name}.");
+
+        AttackData attackData = _attack.CreateAttackData();
+        _target.CurrentHealth -= attackData.Damage;
+        Console.WriteLine($"{_attack.Name} dealt {attackData.Damage} damage to {_target.Name}.");
+        
+        Console.WriteLine($"{_target.Name} is now at {_target.CurrentHealth}/{_target.MaxHealth} HP.");
     }
 }
 
 public interface IAttack
 {
     string Name { get; }
+    AttackData CreateAttackData();
 }
 
-public class StandardAttack : IAttack
+public class Punch : IAttack
 {
-    public string Name { get; }
-
-    public StandardAttack(string name)
-    {
-        Name = name;
-    }
+    public string Name => "PUNCH";
+    public AttackData CreateAttackData() => new AttackData(1);
 }
 
+public class BoneCrunch : IAttack
+{
+    private static readonly Random _random = new Random();
+
+    public string Name => "BONE CRUNCH";
+    public AttackData CreateAttackData() => new AttackData(_random.Next(2));
+}
+
+public record AttackData(int Damage);
 
 public static class InputHelper
 {
