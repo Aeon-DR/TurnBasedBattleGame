@@ -20,6 +20,7 @@ public class ComputerPlayer : IPlayer
     {
         Random random = new Random();
         Party enemyParty = battle.GetEnemyPartyFor(character);
-        return enemyParty.Characters[random.Next(enemyParty.Characters.Count)];
+        List<Character> potentialTargets = enemyParty.Characters.Where(c => c.IsAlive).ToList();
+        return potentialTargets[random.Next(potentialTargets.Count)];
     }
 }

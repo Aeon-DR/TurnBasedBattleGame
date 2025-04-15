@@ -39,8 +39,13 @@ public class AttackAction : IAction
 
         AttackData attackData = _attack.CreateAttackData();
         _target.CurrentHealth -= attackData.Damage;
-        Console.WriteLine($"{_attack.Name} dealt {attackData.Damage} damage to {_target.Name}.");
 
+        Console.WriteLine($"{_attack.Name} dealt {attackData.Damage} damage to {_target.Name}.");
         Console.WriteLine($"{_target.Name} is now at {_target.CurrentHealth}/{_target.MaxHealth} HP.");
+
+        if (!_target.IsAlive)
+        {
+            Console.WriteLine($"{_target.Name} has been defeated!");
+        }
     }
 }

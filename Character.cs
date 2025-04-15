@@ -13,6 +13,8 @@ public abstract class Character
         set => _currentHealth = Math.Clamp(value, 0, MaxHealth); // Prevent from reducing HP below 0 and healing above max HP
     }
 
+    public bool IsAlive => CurrentHealth > 0; 
+
     protected Character(string name, IAttack standardAttack, int maxHealth)
     {
         Name = name;
