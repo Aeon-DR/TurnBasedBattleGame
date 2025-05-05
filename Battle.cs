@@ -6,25 +6,48 @@ public class Battle
     public IPlayer MonstersPlayer { get; }
 
     public Party Heroes { get; }
-    public Party Monsters { get; }
+    public Party Monsters => _monsterParties[_battleNumber];
 
-    private bool WinnerDetermined => !Heroes.Characters.Any(c => c.IsAlive) || !Monsters.Characters.Any(c => c.IsAlive);
+    private readonly List<Party> _monsterParties;
+    private int _battleNumber;
 
-    public Battle(IPlayer heroesPlayer, IPlayer monstersPlayer, Party heroes, Party monsters)
+    private bool WinnerDetermined => HeroPartyEliminated || AllMonsterPartiesEliminated;
+    private bool HeroPartyEliminated => !Heroes.Characters.Any(c => c.IsAlive);
+    private bool MonsterPartyEliminated => !Monsters.Characters.Any(c => c.IsAlive);
+    private bool AllMonsterPartiesEliminated => _battleNumber == _monsterParties.Count - 1 && MonsterPartyEliminated;
+
+    public Battle(IPlayer heroesPlayer, IPlayer monstersPlayer, Party heroes, List<Party> monsterParties)
     {
         HeroesPlayer = heroesPlayer;
         MonstersPlayer = monstersPlayer;
         Heroes = heroes;
-        Monsters = monsters;
+        _monsterParties = monsterParties;
+        _battleNumber = 0;
     }
 
     public void Run()
     {
-        while (!WinnerDetermined)
+        while (true)
         {
+            // Run the hero party
             HandlePartyTurn(HeroesPlayer, Heroes);
             if (WinnerDetermined) break;
-            HandlePartyTurn(MonstersPlayer, Monsters); 
+            if (MonsterPartyEliminated)
+            {
+                Console.WriteLine("\nAdvancing to the next battle now!");
+                _battleNumber++;
+                continue;
+            }
+
+            // Run the monster party
+            HandlePartyTurn(MonstersPlayer, Monsters);
+            if (WinnerDetermined) break;
+            if (MonsterPartyEliminated)
+            {
+                Console.WriteLine("\nAdvancing to the next battle now!");
+                _battleNumber++;
+                continue;
+            }
         }
 
         AnnounceWinner();
@@ -57,7 +80,7 @@ public class Battle
     {
         Console.WriteLine();
 
-        if (Heroes.Characters.Count == 0)
+        if (HeroPartyEliminated)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("The Uncoded One’s forces have prevailed, the heroes have perished...");
