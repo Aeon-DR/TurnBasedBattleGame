@@ -33,3 +33,8 @@ public class Skeleton : Character
 {
     public Skeleton() : base("SKELETON", new BoneCrunch(), 5) { }
 }
+
+public class Antagonist : Character
+{
+    public Antagonist() : base("THE UNCODED ONE", new Unraveling(), 15) { }
+}

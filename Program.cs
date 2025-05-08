@@ -7,6 +7,7 @@ List<Party> monsters = new List<Party>
 { 
     new Party(new List<Character> { new Skeleton() }),
     new Party(new List<Character> { new Skeleton(), new Skeleton() }),
+    new Party(new List<Character> { new Antagonist() })
 };
 
 Battle battle = new Battle(new ComputerPlayer(), new ComputerPlayer(), heroes, monsters);

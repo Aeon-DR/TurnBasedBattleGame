@@ -6,6 +6,12 @@ public interface IAttack
     AttackData CreateAttackData();
 }
 
+public static class AttackUtilities
+{
+    private static readonly Random _random = new Random();
+    public static int GetRandomDamage(int maxExclusive) => _random.Next(maxExclusive);
+}
+
 public class Punch : IAttack
 {
     public string Name => "PUNCH";
@@ -14,8 +20,12 @@ public class Punch : IAttack
 
 public class BoneCrunch : IAttack
 {
-    private static readonly Random _random = new Random();
-
     public string Name => "BONE CRUNCH";
-    public AttackData CreateAttackData() => new AttackData(_random.Next(2));
+    public AttackData CreateAttackData() => new AttackData(AttackUtilities.GetRandomDamage(2));
+}
+
+public class Unraveling : IAttack
+{
+    public string Name => "UNRAVELING";
+    public AttackData CreateAttackData() => new AttackData(AttackUtilities.GetRandomDamage(3));
 }
