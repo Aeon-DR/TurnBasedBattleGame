@@ -96,4 +96,11 @@ public class Battle
 
     public Party GetPartyFor(Character character) => Heroes.Characters.Contains(character) ? Heroes : Monsters;
     public Party GetEnemyPartyFor(Character character) => Heroes.Characters.Contains(character) ? Monsters : Heroes;
+
+    public List<Character> GetAliveEnemies(Character character)
+    {
+        return GetEnemyPartyFor(character).Characters
+                                          .Where(c => c.IsAlive)
+                                          .ToList();
+    }
 }
