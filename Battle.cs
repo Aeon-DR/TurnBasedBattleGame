@@ -34,7 +34,7 @@ public class Battle
             if (WinnerDetermined) break;
             if (MonsterPartyEliminated)
             {
-                Console.WriteLine("\nAdvancing to the next battle now!");
+                ConsoleHelper.WriteColoredLine("\nAdvancing to the next battle now!", ConsoleColor.Blue);
                 _battleNumber++;
                 continue;
             }
@@ -44,7 +44,7 @@ public class Battle
             if (WinnerDetermined) break;
             if (MonsterPartyEliminated)
             {
-                Console.WriteLine("\nAdvancing to the next battle now!");
+                ConsoleHelper.WriteColoredLine("\nAdvancing to the next battle now!", ConsoleColor.Blue);
                 _battleNumber++;
                 continue;
             }
@@ -59,8 +59,8 @@ public class Battle
         {
             if (!character.IsAlive) continue;
 
-            Console.WriteLine();
-            Console.WriteLine($"It is {character.Name}'s turn.");
+            DisplayBattleStatus();
+            ConsoleHelper.WriteColoredLine($"It is {character.Name}'s turn.", ConsoleColor.DarkYellow);
             IAction chosenAction = player.ChooseAction(this, character);
             chosenAction.Perform();
 
@@ -76,22 +76,37 @@ public class Battle
         Monsters.Characters.RemoveAll(c => !c.IsAlive);
     }
 
+    private void DisplayBattleStatus()
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+
+        Console.WriteLine("\n============ BATTLE ============");
+        foreach(Character character in Heroes.Characters.Where(c => c.IsAlive))
+        {
+            Console.WriteLine($"{character.Name} ({character.CurrentHealth}/{character.MaxHealth})");
+        }
+        Console.WriteLine("------------- VS ---------------");
+        foreach (Character character in Monsters.Characters.Where(c => c.IsAlive))
+        {
+            Console.WriteLine($"{character.Name} ({character.CurrentHealth}/{character.MaxHealth})");
+        }
+        Console.WriteLine("================================\n");
+
+        Console.ForegroundColor = ConsoleColor.Gray;
+    }
+
     private void AnnounceWinner()
     {
         Console.WriteLine();
 
         if (HeroPartyEliminated)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("The Uncoded One’s forces have prevailed, the heroes have perished...");
+            ConsoleHelper.WriteColoredLine("The Uncoded One’s forces have prevailed, the heroes have perished...", ConsoleColor.Red);
         }
         else
         {
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("The Uncoded One has been vanquished, the heroes can celebrate the victory!");
+            ConsoleHelper.WriteColoredLine("The Uncoded One has been vanquished, the heroes can celebrate the victory!", ConsoleColor.DarkGreen);
         }
-
-        Console.ForegroundColor = ConsoleColor.Gray;
     }
 
     public Party GetPartyFor(Character character) => Heroes.Characters.Contains(character) ? Heroes : Monsters;

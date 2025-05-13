@@ -1,17 +1,20 @@
 ﻿namespace TurnBasedBattleGame;
 
-public static class InputHelper
+public static class ConsoleHelper
 {
     public static string ChooseHeroName(string prompt)
     {
         while (true)
         {
             Console.WriteLine(prompt);
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
             string? name = Console.ReadLine()?.Trim().ToUpper();
+            Console.ForegroundColor = ConsoleColor.Gray;
 
             if (string.IsNullOrWhiteSpace(name))
             {
-                Console.WriteLine("The name cannot be empty.\n");
+                WriteColoredLine("The name cannot be empty.\n", ConsoleColor.DarkRed);
                 continue;
             }
 
@@ -30,13 +33,23 @@ public static class InputHelper
                 Console.WriteLine($"{i + 1} - {options[i]}");
             }
 
+            Console.ForegroundColor = ConsoleColor.Cyan;
             string? input = Console.ReadLine();
+            Console.ForegroundColor = ConsoleColor.Gray;
+
             if (int.TryParse(input, out int choice) && choice >= 1 && choice <= options.Count)
             {
                 return choice;
             }
 
-            Console.WriteLine("Invalid option, please try again.\n");
+            WriteColoredLine("Invalid option, please try again.\n", ConsoleColor.DarkRed);
         }
+    }
+
+    public static void WriteColoredLine(string message, ConsoleColor foregroundColor)
+    {
+        Console.ForegroundColor = foregroundColor;
+        Console.WriteLine(message);
+        Console.ForegroundColor = ConsoleColor.Gray;
     }
 }

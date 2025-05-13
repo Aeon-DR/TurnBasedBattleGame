@@ -45,7 +45,7 @@ public class AttackAction : IAction
 
         if (!_target.IsAlive)
         {
-            Console.WriteLine($"{_target.Name} has been defeated!");
+            ConsoleHelper.WriteColoredLine($"{_target.Name} has been defeated!", ConsoleColor.Blue);
         }
     }
 }

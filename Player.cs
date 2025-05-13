@@ -28,7 +28,7 @@ public class HumanPlayer : IPlayer
 {
     public IAction ChooseAction(Battle battle, Character actor)
     {
-        int choice = InputHelper.PromptWithMenu(
+        int choice = ConsoleHelper.PromptWithMenu(
             $"What do you want {actor.Name} to do?", 
             [$"Standard Attack ({actor.StandardAttack.Name})", "Skip Turn"]);
 
@@ -37,7 +37,7 @@ public class HumanPlayer : IPlayer
             var targets = battle.GetAliveEnemies(actor);
             if (targets.Count == 1) return new AttackAction(actor, targets[0], actor.StandardAttack);
 
-            int targetChoice = InputHelper.PromptWithMenu(
+            int targetChoice = ConsoleHelper.PromptWithMenu(
                 $"What target do you want {actor.Name} to attack?",
                targets.Select(t => $"{t.Name} ({t.CurrentHealth}/{t.MaxHealth} HP)").ToList());
 

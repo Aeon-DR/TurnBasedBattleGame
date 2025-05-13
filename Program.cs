@@ -1,8 +1,8 @@
 ﻿using TurnBasedBattleGame;
 
-string protagonistName = InputHelper.ChooseHeroName("What is the protagonist's name?");
+string protagonistName = ConsoleHelper.ChooseHeroName("What is the protagonist's name?");
 
-int gameMode = InputHelper.PromptWithMenu(
+int gameMode = ConsoleHelper.PromptWithMenu(
     "What game mode do you want to play?",
     ["Human vs Human", "Human vs Computer", "Computer vs Computer"]);
 
