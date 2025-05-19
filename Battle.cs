@@ -68,12 +68,19 @@ public class Battle
         }
 
         RemoveDeadCharacters();
+        RemoveUsedItems();
     }
 
     private void RemoveDeadCharacters()
     {
         Heroes.Characters.RemoveAll(c => !c.IsAlive);
         Monsters.Characters.RemoveAll(c => !c.IsAlive);
+    }
+
+    private void RemoveUsedItems()
+    {
+        Heroes.Items.RemoveAll(i => i.Used);
+        Monsters.Items.RemoveAll(i => i.Used);
     }
 
     private void DisplayBattleStatus()
@@ -114,8 +121,11 @@ public class Battle
 
     public List<Character> GetAliveEnemies(Character character)
     {
-        return GetEnemyPartyFor(character).Characters
-                                          .Where(c => c.IsAlive)
-                                          .ToList();
+        return GetEnemyPartyFor(character).Characters.Where(c => c.IsAlive).ToList();
+    }
+
+    public List<Character> GetAliveAllies(Character character)
+    {
+        return GetPartyFor(character).Characters.Where(c => c.IsAlive).ToList();
     }
 }
