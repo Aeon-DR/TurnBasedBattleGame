@@ -65,7 +65,7 @@ public class UseItemAction : IAction
 
     public void Perform()
     {
-        Console.WriteLine($"{_actor.Name} used {_item.Name.ToUpper()} on {_target.Name}.");
+        Console.WriteLine($"{_actor.Name} used {_item.Name} on {_target.Name}.");
 
         if (_item is HealthPotion)
         {
@@ -82,6 +82,37 @@ public class UseItemAction : IAction
         else
         {
             throw new InvalidOperationException("Unsupported item type.");
+        }
+    }
+}
+
+public class EquipGearAction : IAction
+{
+    private readonly Battle _battle;
+    private readonly Character _target;
+    private readonly IGear _gear;
+
+    public EquipGearAction(Battle battle, Character target, IGear gear)
+    {
+        _battle = battle;
+        _target = target;
+        _gear = gear;
+    }
+
+    public void Perform()
+    {
+        IGear? previousGear = _target.Gear;
+        List<IGear>? partyGear = _battle.GetPartyGear(_target);
+
+        _target.Gear = _gear;
+        partyGear?.Remove(_gear);
+
+        ConsoleHelper.WriteColoredLine($"{_target.Name} equipped {_gear.Name}.", ConsoleColor.DarkGreen);
+
+        if (previousGear != null)
+        {
+            partyGear?.Add(previousGear);
+            ConsoleHelper.WriteColoredLine($"Previously equipped {previousGear.Name} has been returned to the party's inventory.", ConsoleColor.DarkRed);
         }
     }
 }

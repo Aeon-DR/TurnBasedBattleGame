@@ -9,7 +9,7 @@ public interface IItem
 
 public class HealthPotion : IItem
 {
-    public string Name => "Health Potion";
+    public string Name => "HEALTH POTION";
     public int Power => 10;
     public bool Used { get; set; }
 }

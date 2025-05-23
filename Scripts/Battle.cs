@@ -90,12 +90,12 @@ public class Battle
         Console.WriteLine("\n============ BATTLE ============");
         foreach(Character character in Heroes.Characters.Where(c => c.IsAlive))
         {
-            Console.WriteLine($"{character.Name} ({character.CurrentHealth}/{character.MaxHealth})");
+            Console.WriteLine(character.GetCharacterInfo());
         }
         Console.WriteLine("------------- VS ---------------");
         foreach (Character character in Monsters.Characters.Where(c => c.IsAlive))
         {
-            Console.WriteLine($"{character.Name} ({character.CurrentHealth}/{character.MaxHealth})");
+            Console.WriteLine(character.GetCharacterInfo());
         }
         Console.WriteLine("================================\n");
 
@@ -127,5 +127,10 @@ public class Battle
     public List<Character> GetAliveAllies(Character character)
     {
         return GetPartyFor(character).Characters.Where(c => c.IsAlive).ToList();
+    }
+
+    public List<IGear>? GetPartyGear(Character character)
+    {
+        return GetPartyFor(character).Gear;
     }
 }

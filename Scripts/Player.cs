@@ -14,15 +14,26 @@ public class ComputerPlayer : IPlayer
         // A brief delay to simulate hesitation
         Thread.Sleep(1000);
 
-        // Use a health potion at random if HP is under 50% and a potion is available
+        // Use a health potion at random if HP is at or under 50% and a potion is available
         List<IItem> potions = battle.GetPartyFor(actor).Items.Where(i => i is HealthPotion && !i.Used).ToList();
-        if (potions.Count > 0 && actor.CurrentHealth < actor.MaxHealth / 2 && _random.NextDouble() < 0.3f)
+        if (potions.Count > 0 && actor.CurrentHealth <= actor.MaxHealth / 2 && _random.NextDouble() < 0.5f)
         {
             return new UseItemAction(actor, actor, potions.First());
         }
 
-        // Attack a random target
+        // Equip gear at random if no gear is equipped and available
+        List<IGear>? partyGear = battle.GetPartyGear(actor);
+        if (actor.Gear == null && partyGear?.Count > 0 && _random.NextDouble() < 0.5f)
+        {
+            return new EquipGearAction(battle, actor, partyGear.First());
+        }
+
+        // Attack a random target with gear attack if available, otherwise do the standard attack
         Character target = SelectRandomTarget(battle, actor);
+        if (actor.Gear != null)
+        {
+            return new AttackAction(actor, target, actor.Gear.Attack);
+        }
         return new AttackAction(actor, target, actor.StandardAttack);
     }
 
@@ -37,38 +48,39 @@ public class HumanPlayer : IPlayer
 {
     public IAction ChooseAction(Battle battle, Character actor)
     {
-        List<string> options = new List<string>();
+        var actions = new Dictionary<string, Func<IAction>>();
+
         List<IItem> items = battle.GetPartyFor(actor).Items.Where(i => !i.Used).ToList();
+        List<IGear>? partyGear = battle.GetPartyGear(actor);
+        
+        actions.Add($"Standard Attack ({actor.StandardAttack.Name})", () => PerformAttack(battle, actor, actor.StandardAttack));
 
-        options.Add($"Standard Attack ({actor.StandardAttack.Name})");
-        if (items.Count > 0) options.Add("Use Item");
-        options.Add("Skip Turn");
+        if (actor.Gear != null)
+            actions.Add($"Special Attack ({actor.Gear.Attack.Name})", () => PerformAttack(battle, actor, actor.Gear.Attack));
 
-        int choice = ConsoleHelper.PromptWithMenu($"What do you want {actor.Name} to do?", options);
+        if (partyGear?.Count > 0)
+            actions.Add("Equip Gear", () => EquipGear(battle, actor, partyGear));
 
-        if (choice == 1)
-        {
-            return PerformStandardAttack(battle, actor);
-        }
+        if (items.Count > 0)
+            actions.Add("Use Item", () => UseItem(battle, actor, items));
 
-        if (choice == 2 && items.Count > 0)
-        {
-            return UseItem(battle, actor, items);
-        }
+        actions.Add("Skip Turn", () => new SkipTurnAction(actor));
 
-        return new SkipTurnAction(actor);
+        int choice = ConsoleHelper.PromptWithMenu($"What do you want {actor.Name} to do?", actions.Keys.ToList());
+
+        return actions.Values.ElementAt(choice - 1)();
     }
 
-    private static AttackAction PerformStandardAttack(Battle battle, Character actor)
+    private static AttackAction PerformAttack(Battle battle, Character actor, IAttack attack)
     {
         var targets = battle.GetAliveEnemies(actor);
-        if (targets.Count == 1) return new AttackAction(actor, targets[0], actor.StandardAttack);
+        if (targets.Count == 1) return new AttackAction(actor, targets[0], attack);
 
         int targetChoice = ConsoleHelper.PromptWithMenu(
             $"What target do you want {actor.Name} to attack?",
            targets.Select(t => $"{t.Name} ({t.CurrentHealth}/{t.MaxHealth} HP)").ToList());
 
-        return new AttackAction(actor, targets[targetChoice - 1], actor.StandardAttack);
+        return new AttackAction(actor, targets[targetChoice - 1], attack);
     }
 
     private static UseItemAction UseItem(Battle battle, Character actor, List<IItem> items)
@@ -92,5 +104,16 @@ public class HumanPlayer : IPlayer
         }
 
         throw new InvalidOperationException("Unsupported item type.");
+    }
+
+    private static EquipGearAction EquipGear(Battle battle, Character actor, List<IGear> partyGear)
+    {
+        if (partyGear.Count == 1) return new EquipGearAction(battle, actor, partyGear[0]);
+
+        int gearChoice = ConsoleHelper.PromptWithMenu(
+                $"What gear do you want to equip?",
+               partyGear.Select(g => $"{g.Name}").ToList());
+
+        return new EquipGearAction(battle, actor, partyGear[gearChoice - 1]);
     }
 }

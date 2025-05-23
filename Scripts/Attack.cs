@@ -29,3 +29,15 @@ public class Unraveling : IAttack
     public string Name => "UNRAVELING";
     public AttackData CreateAttackData() => new AttackData(AttackUtilities.GetRandomDamage(3));
 }
+
+public class Slash : IAttack
+{
+    public string Name => "SLASH";
+    public AttackData CreateAttackData() => new AttackData(2);
+}
+
+public class Stab : IAttack
+{
+    public string Name => "STAB";
+    public AttackData CreateAttackData() => new AttackData(1);
+}

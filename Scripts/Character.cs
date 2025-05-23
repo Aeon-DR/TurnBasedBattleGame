@@ -4,6 +4,7 @@ public abstract class Character
 {
     public string Name { get; }
     public IAttack StandardAttack { get; }
+    public IGear? Gear { get; set; }
     public int MaxHealth { get; }
 
     private int _currentHealth;
@@ -13,7 +14,13 @@ public abstract class Character
         set => _currentHealth = Math.Clamp(value, 0, MaxHealth); // Prevent from reducing HP below 0 and healing above max HP
     }
 
-    public bool IsAlive => CurrentHealth > 0; 
+    public bool IsAlive => CurrentHealth > 0;
+
+    public string GetCharacterInfo()
+    {
+        string gearInfo = Gear != null ? $" | {Gear.Name}" : string.Empty;
+        return $"{Name} ({CurrentHealth}/{MaxHealth}){gearInfo}";
+    }
 
     protected Character(string name, IAttack standardAttack, int maxHealth)
     {
@@ -26,7 +33,10 @@ public abstract class Character
 
 public class Protagonist : Character
 {
-    public Protagonist(string name) : base(name, new Punch(), 25) { }
+    public Protagonist(string name) : base(name, new Punch(), 25) 
+    {
+        Gear = new Sword();
+    }
 }
 
 public class Skeleton : Character
