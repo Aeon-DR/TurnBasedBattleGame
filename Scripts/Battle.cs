@@ -34,8 +34,7 @@ public class Battle
             if (WinnerDetermined) break;
             if (MonsterPartyEliminated)
             {
-                ConsoleHelper.WriteColoredLine("\nAdvancing to the next battle now!", ConsoleColor.Blue);
-                _battleNumber++;
+                AdvanceToNextBattle();
                 continue;
             }
 
@@ -44,8 +43,7 @@ public class Battle
             if (WinnerDetermined) break;
             if (MonsterPartyEliminated)
             {
-                ConsoleHelper.WriteColoredLine("\nAdvancing to the next battle now!", ConsoleColor.Blue);
-                _battleNumber++;
+                AdvanceToNextBattle();
                 continue;
             }
         }
@@ -116,6 +114,18 @@ public class Battle
         }
     }
 
+    private void AdvanceToNextBattle()
+    {
+        ConsoleHelper.WriteColoredLine("\nThe enemy party has been defeated!", ConsoleColor.Blue);
+
+        Console.ForegroundColor = ConsoleColor.DarkGreen;
+        TransferDefeatedPartyItems();
+        TransferDefeatedPartyGear();
+
+        ConsoleHelper.WriteColoredLine("\nAdvancing to the next battle now!", ConsoleColor.Blue);
+        _battleNumber++;
+    }
+
     public Party GetPartyFor(Character character) => Heroes.Characters.Contains(character) ? Heroes : Monsters;
     public Party GetEnemyPartyFor(Character character) => Heroes.Characters.Contains(character) ? Monsters : Heroes;
 
@@ -129,8 +139,34 @@ public class Battle
         return GetPartyFor(character).Characters.Where(c => c.IsAlive).ToList();
     }
 
-    public List<IGear>? GetPartyGear(Character character)
+    public List<IGear> GetPartyGear(Character character)
     {
         return GetPartyFor(character).Gear;
+    }
+
+    private void TransferDefeatedPartyItems()
+    {
+        if (Monsters.Items.Count == 0) return;
+
+        foreach (IItem item in Monsters.Items)
+        {
+            Heroes.Items.Add(item);
+            Console.WriteLine($"Acquired {item.Name} from the defeated party!");
+        }
+
+        Monsters.Items.Clear();
+    }
+
+    private void TransferDefeatedPartyGear()
+    {
+        if (Monsters.Gear.Count == 0) return; 
+
+        foreach (IGear gear in Monsters.Gear)
+        {
+            Heroes.Gear.Add(gear);
+            Console.WriteLine($"Acquired {gear.Name} from the defeated party!");
+        }
+
+        Monsters.Gear.Clear();
     }
 }

@@ -22,12 +22,14 @@ public class SkipTurnAction : IAction
 
 public class AttackAction : IAction
 {
+    private readonly Battle _battle;
     private readonly Character _actor;
     private readonly Character _target;
     private readonly IAttack _attack;
 
-    public AttackAction(Character actor, Character target, IAttack attack)
+    public AttackAction(Battle battle, Character actor, Character target, IAttack attack)
     {
+        _battle = battle;
         _actor = actor;
         _target = target;
         _attack = attack;
@@ -46,6 +48,12 @@ public class AttackAction : IAction
         if (!_target.IsAlive)
         {
             ConsoleHelper.WriteColoredLine($"{_target.Name} has been defeated!", ConsoleColor.Blue);
+            if (_target.Gear != null)
+            {
+                _battle.GetPartyFor(_actor).Gear.Add(_target.Gear);
+                ConsoleHelper.WriteColoredLine($"{_actor.Name}'s party acquired {_target.Gear.Name}!", ConsoleColor.DarkGreen);
+                _target.Gear = null;
+            }
         }
     }
 }
@@ -102,16 +110,16 @@ public class EquipGearAction : IAction
     public void Perform()
     {
         IGear? previousGear = _target.Gear;
-        List<IGear>? partyGear = _battle.GetPartyGear(_target);
+        List<IGear> partyGear = _battle.GetPartyGear(_target);
 
         _target.Gear = _gear;
-        partyGear?.Remove(_gear);
+        partyGear.Remove(_gear);
 
         ConsoleHelper.WriteColoredLine($"{_target.Name} equipped {_gear.Name}.", ConsoleColor.DarkGreen);
 
         if (previousGear != null)
         {
-            partyGear?.Add(previousGear);
+            partyGear.Add(previousGear);
             ConsoleHelper.WriteColoredLine($"Previously equipped {previousGear.Name} has been returned to the party's inventory.", ConsoleColor.DarkRed);
         }
     }

@@ -22,8 +22,8 @@ public class ComputerPlayer : IPlayer
         }
 
         // Equip gear at random if no gear is equipped and available
-        List<IGear>? partyGear = battle.GetPartyGear(actor);
-        if (actor.Gear == null && partyGear?.Count > 0 && _random.NextDouble() < 0.5f)
+        List<IGear> partyGear = battle.GetPartyGear(actor);
+        if (actor.Gear == null && partyGear.Count > 0 && _random.NextDouble() < 0.5f)
         {
             return new EquipGearAction(battle, actor, partyGear.First());
         }
@@ -32,9 +32,9 @@ public class ComputerPlayer : IPlayer
         Character target = SelectRandomTarget(battle, actor);
         if (actor.Gear != null)
         {
-            return new AttackAction(actor, target, actor.Gear.Attack);
+            return new AttackAction(battle, actor, target, actor.Gear.Attack);
         }
-        return new AttackAction(actor, target, actor.StandardAttack);
+        return new AttackAction(battle, actor, target, actor.StandardAttack);
     }
 
     private Character SelectRandomTarget(Battle battle, Character character)
@@ -51,14 +51,14 @@ public class HumanPlayer : IPlayer
         var actions = new Dictionary<string, Func<IAction>>();
 
         List<IItem> items = battle.GetPartyFor(actor).Items.Where(i => !i.Used).ToList();
-        List<IGear>? partyGear = battle.GetPartyGear(actor);
+        List<IGear> partyGear = battle.GetPartyGear(actor);
         
         actions.Add($"Standard Attack ({actor.StandardAttack.Name})", () => PerformAttack(battle, actor, actor.StandardAttack));
 
         if (actor.Gear != null)
             actions.Add($"Special Attack ({actor.Gear.Attack.Name})", () => PerformAttack(battle, actor, actor.Gear.Attack));
 
-        if (partyGear?.Count > 0)
+        if (partyGear.Count > 0)
             actions.Add("Equip Gear", () => EquipGear(battle, actor, partyGear));
 
         if (items.Count > 0)
@@ -74,13 +74,13 @@ public class HumanPlayer : IPlayer
     private static AttackAction PerformAttack(Battle battle, Character actor, IAttack attack)
     {
         var targets = battle.GetAliveEnemies(actor);
-        if (targets.Count == 1) return new AttackAction(actor, targets[0], attack);
+        if (targets.Count == 1) return new AttackAction(battle, actor, targets[0], attack);
 
         int targetChoice = ConsoleHelper.PromptWithMenu(
             $"What target do you want {actor.Name} to attack?",
            targets.Select(t => $"{t.Name} ({t.CurrentHealth}/{t.MaxHealth} HP)").ToList());
 
-        return new AttackAction(actor, targets[targetChoice - 1], attack);
+        return new AttackAction(battle, actor, targets[targetChoice - 1], attack);
     }
 
     private static UseItemAction UseItem(Battle battle, Character actor, List<IItem> items)
