@@ -48,27 +48,33 @@ public class HumanPlayer : IPlayer
 {
     public IAction ChooseAction(Battle battle, Character actor)
     {
-        var actions = new Dictionary<string, Func<IAction>>();
+        while (true)
+        {
+            var actions = new Dictionary<string, Func<IAction?>>();
 
-        List<IItem> items = battle.GetPartyFor(actor).Items.Where(i => !i.Used).ToList();
-        List<IGear> partyGear = battle.GetPartyGear(actor);
-        
-        actions.Add($"Standard Attack ({actor.StandardAttack.Name})", () => PerformAttack(battle, actor, actor.StandardAttack));
+            List<IItem> items = battle.GetPartyFor(actor).Items.Where(i => !i.Used).ToList();
+            List<IGear> partyGear = battle.GetPartyGear(actor);
 
-        if (actor.Gear != null)
-            actions.Add($"Special Attack ({actor.Gear.Attack.Name})", () => PerformAttack(battle, actor, actor.Gear.Attack));
+            actions.Add($"Standard Attack ({actor.StandardAttack.Name})", () => PerformAttack(battle, actor, actor.StandardAttack));
 
-        if (partyGear.Count > 0)
-            actions.Add("Equip Gear", () => EquipGear(battle, actor, partyGear));
+            if (actor.Gear != null)
+                actions.Add($"Special Attack ({actor.Gear.Attack.Name})", () => PerformAttack(battle, actor, actor.Gear.Attack));
 
-        if (items.Count > 0)
-            actions.Add("Use Item", () => UseItem(battle, actor, items));
+            if (partyGear.Count > 0)
+                actions.Add("Equip Gear", () => EquipGear(battle, actor, partyGear));
 
-        actions.Add("Skip Turn", () => new SkipTurnAction(actor));
+            if (items.Count > 0)
+                actions.Add("Use Item", () => UseItem(battle, actor, items));
 
-        int choice = ConsoleHelper.PromptWithMenu($"What do you want {actor.Name} to do?", actions.Keys.ToList());
+            actions.Add("Skip Turn", () => new SkipTurnAction(actor));
 
-        return actions.Values.ElementAt(choice - 1)();
+            int choice = ConsoleHelper.PromptWithMenu($"What do you want {actor.Name} to do?", actions.Keys.ToList());
+
+            var selectedAction = actions.Values.ElementAt(choice - 1)();
+
+            if (selectedAction != null)
+                return selectedAction;
+        }
     }
 
     private static AttackAction PerformAttack(Battle battle, Character actor, IAttack attack)
@@ -83,11 +89,14 @@ public class HumanPlayer : IPlayer
         return new AttackAction(battle, actor, targets[targetChoice - 1], attack);
     }
 
-    private static UseItemAction UseItem(Battle battle, Character actor, List<IItem> items)
+    private static UseItemAction? UseItem(Battle battle, Character actor, List<IItem> items)
     {
         int itemChoice = ConsoleHelper.PromptWithMenu(
                 $"What item do you want to use?",
-               items.Select(i => $"{i.Name} ({i.Power} HP)").ToList());
+               items.Select(i => $"{i.Name} ({i.Power} HP)").ToList(),
+               backAllowed: true);
+
+        if (itemChoice == -1) return null;
 
         IItem item = items[itemChoice - 1];
 
@@ -106,13 +115,14 @@ public class HumanPlayer : IPlayer
         throw new InvalidOperationException("Unsupported item type.");
     }
 
-    private static EquipGearAction EquipGear(Battle battle, Character actor, List<IGear> partyGear)
+    private static EquipGearAction? EquipGear(Battle battle, Character actor, List<IGear> partyGear)
     {
-        if (partyGear.Count == 1) return new EquipGearAction(battle, actor, partyGear[0]);
-
         int gearChoice = ConsoleHelper.PromptWithMenu(
                 $"What gear do you want to equip?",
-               partyGear.Select(g => $"{g.Name}").ToList());
+               partyGear.Select(g => $"{g.Name}").ToList(), 
+               backAllowed: true);
+
+        if (gearChoice == -1) return null;
 
         return new EquipGearAction(battle, actor, partyGear[gearChoice - 1]);
     }

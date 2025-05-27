@@ -23,11 +23,17 @@ public static class ConsoleHelper
         }
     }
 
-    public static int PromptWithMenu(string prompt, List<string> options)
+    public static int PromptWithMenu(string prompt, List<string> options, bool backAllowed = false)
     {
         while (true)
         {
             Console.WriteLine(prompt);
+
+            if (backAllowed)
+            {
+                Console.WriteLine($"0 - Back");
+            }
+
             for (int i = 0; i < options.Count; i++)
             {
                 Console.WriteLine($"{i + 1} - {options[i]}");
@@ -37,9 +43,10 @@ public static class ConsoleHelper
             string? input = Console.ReadLine();
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            if (int.TryParse(input, out int choice) && choice >= 1 && choice <= options.Count)
+            if (int.TryParse(input, out int choice))
             {
-                return choice;
+                if (choice == 0) return -1;
+                if (choice >= 1 && choice <= options.Count) return choice;
             }
 
             WriteColoredLine("Invalid option, please try again.\n", ConsoleColor.DarkRed);
