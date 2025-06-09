@@ -1,3 +1,3 @@
 ﻿namespace TurnBasedBattleGame;
 
-public record AttackData(int Damage);
+public record AttackData(int Damage, double ProbabilityOfSuccess = 1);

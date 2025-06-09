@@ -41,3 +41,9 @@ public class Stab : IAttack
     public string Name => "STAB";
     public AttackData CreateAttackData() => new AttackData(1);
 }
+
+public class QuickShot : IAttack
+{
+    public string Name => "QUICK SHOT";
+    public AttackData CreateAttackData() => new AttackData(3, 0.5);
+}

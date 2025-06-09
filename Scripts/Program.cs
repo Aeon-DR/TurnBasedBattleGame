@@ -11,7 +11,7 @@ IPlayer p2 = (gameMode == 1) ? new HumanPlayer() : new ComputerPlayer();
 
 Party heroes = new Party
 (
-    new List<Character> { new Protagonist(protagonistName) },
+    new List<Character> { new Protagonist(protagonistName), new VinFletcher() },
     new List<IItem> { new HealthPotion(), new HealthPotion(), new HealthPotion() }
 );
 

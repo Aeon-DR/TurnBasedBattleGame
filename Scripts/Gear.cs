@@ -17,3 +17,9 @@ public class Dagger : IGear
     public string Name => "DAGGER";
     public IAttack Attack => new Stab();
 }
+
+public class VinsBow : IGear
+{
+    public string Name => "VIN'S BOW";
+    public IAttack Attack => new QuickShot();
+}

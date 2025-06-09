@@ -22,6 +22,8 @@ public class SkipTurnAction : IAction
 
 public class AttackAction : IAction
 {
+    private static readonly Random _random = new Random();
+
     private readonly Battle _battle;
     private readonly Character _actor;
     private readonly Character _target;
@@ -40,21 +42,28 @@ public class AttackAction : IAction
         Console.WriteLine($"{_actor.Name} used {_attack.Name} on {_target.Name}.");
 
         AttackData attackData = _attack.CreateAttackData();
-        _target.CurrentHealth -= attackData.Damage;
 
-        ConsoleHelper.WriteColoredLine($"{_attack.Name} dealt {attackData.Damage} damage to {_target.Name}.", ConsoleColor.DarkRed);
-        Console.WriteLine($"{_target.Name} is now at {_target.CurrentHealth}/{_target.MaxHealth} HP.");
-
-        if (!_target.IsAlive)
+        if (_random.NextDouble() <= attackData.ProbabilityOfSuccess)
         {
-            ConsoleHelper.WriteColoredLine($"{_target.Name} has been defeated!", ConsoleColor.Blue);
-            if (_target.Gear != null)
+            _target.CurrentHealth -= attackData.Damage;
+            ConsoleHelper.WriteColoredLine($"{_attack.Name} dealt {attackData.Damage} damage to {_target.Name}.", ConsoleColor.DarkRed);
+            Console.WriteLine($"{_target.Name} is now at {_target.CurrentHealth}/{_target.MaxHealth} HP.");
+
+            if (!_target.IsAlive)
             {
-                _battle.GetPartyFor(_actor).Gear.Add(_target.Gear);
-                ConsoleHelper.WriteColoredLine($"{_actor.Name}'s party acquired {_target.Gear.Name}!", ConsoleColor.DarkGreen);
-                _target.Gear = null;
+                ConsoleHelper.WriteColoredLine($"{_target.Name} has been defeated!", ConsoleColor.Blue);
+                if (_target.Gear != null)
+                {
+                    _battle.GetPartyFor(_actor).Gear.Add(_target.Gear);
+                    ConsoleHelper.WriteColoredLine($"{_actor.Name}'s party acquired {_target.Gear.Name}!", ConsoleColor.DarkGreen);
+                    _target.Gear = null;
+                }
             }
         }
+        else
+        {
+            ConsoleHelper.WriteColoredLine($"{_actor.Name} missed!", ConsoleColor.DarkRed);
+        }      
     }
 }
 

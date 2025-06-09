@@ -39,6 +39,14 @@ public class Protagonist : Character
     }
 }
 
+public class VinFletcher : Character
+{
+    public VinFletcher() : base("VIN FLETCHER", new Punch(), 15)
+    {
+        Gear = new VinsBow();
+    }
+}
+
 public class Skeleton : Character
 {
     public Skeleton() : base("SKELETON", new BoneCrunch(), 5) { }
