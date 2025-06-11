@@ -30,6 +30,10 @@ List<Party> monsters = new List<Party>
     ),
     new Party
     (
+        new List<Character> { new StoneGargoyle(), new StoneGargoyle() }
+    ),
+    new Party
+    (
         new List<Character> { new Antagonist() },
         new List<IItem> { new HealthPotion() }
     )

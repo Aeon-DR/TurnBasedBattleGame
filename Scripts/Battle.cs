@@ -63,6 +63,7 @@ public class Battle
             chosenAction.Perform();
 
             if (WinnerDetermined) return;
+            if (MonsterPartyEliminated) break;
         }
 
         RemoveDeadCharacters();

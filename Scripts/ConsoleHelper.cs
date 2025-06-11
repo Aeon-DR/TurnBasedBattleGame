@@ -45,7 +45,7 @@ public static class ConsoleHelper
 
             if (int.TryParse(input, out int choice))
             {
-                if (choice == 0) return -1;
+                if (choice == 0 && backAllowed) return -1;
                 if (choice >= 1 && choice <= options.Count) return choice;
             }
 

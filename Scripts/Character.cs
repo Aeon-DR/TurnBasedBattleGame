@@ -5,6 +5,7 @@ public abstract class Character
     public string Name { get; }
     public IAttack StandardAttack { get; }
     public IGear? Gear { get; set; }
+    public IAttackModifier? DefensiveAttackModifier { get; set; }
     public int MaxHealth { get; }
 
     private int _currentHealth;
@@ -47,12 +48,20 @@ public class VinFletcher : Character
     }
 }
 
+public class Antagonist : Character
+{
+    public Antagonist() : base("THE UNCODED ONE", new Unraveling(), 15) { }
+}
+
 public class Skeleton : Character
 {
     public Skeleton() : base("SKELETON", new BoneCrunch(), 5) { }
 }
 
-public class Antagonist : Character
+public class StoneGargoyle : Character
 {
-    public Antagonist() : base("THE UNCODED ONE", new Unraveling(), 15) { }
+    public StoneGargoyle() : base("STONE GARGOYLE", new Bite(), 4) 
+    {
+        DefensiveAttackModifier = new StoneArmor();
+    }
 }

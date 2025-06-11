@@ -30,6 +30,12 @@ public class Unraveling : IAttack
     public AttackData CreateAttackData() => new AttackData(AttackUtilities.GetRandomDamage(3));
 }
 
+public class Bite : IAttack
+{
+    public string Name => "BITE";
+    public AttackData CreateAttackData() => new AttackData(1);
+}
+
 public class Slash : IAttack
 {
     public string Name => "SLASH";

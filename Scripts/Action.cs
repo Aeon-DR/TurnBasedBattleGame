@@ -45,6 +45,13 @@ public class AttackAction : IAction
 
         if (_random.NextDouble() <= attackData.ProbabilityOfSuccess)
         {
+            if (_target.DefensiveAttackModifier != null)
+            {
+                int initialDamage = attackData.Damage;
+                attackData = _target.DefensiveAttackModifier.ModifyAttack(attackData);
+                ConsoleHelper.WriteColoredLine($"{_target.DefensiveAttackModifier.Name} reduced the attack by {initialDamage - attackData.Damage} point(s).", ConsoleColor.Magenta);
+            }
+
             _target.CurrentHealth -= attackData.Damage;
             ConsoleHelper.WriteColoredLine($"{_attack.Name} dealt {attackData.Damage} damage to {_target.Name}.", ConsoleColor.DarkRed);
             Console.WriteLine($"{_target.Name} is now at {_target.CurrentHealth}/{_target.MaxHealth} HP.");
